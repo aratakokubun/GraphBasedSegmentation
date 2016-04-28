@@ -7,15 +7,10 @@ from Edge import *
 import CreateGraphBasedSegment as cgbs
 
 # Load image via PIL
-img = np.array(Image.open('images/sample.jpg'))
+img = np.array(Image.open('images/sample5.jpg'))
+# img = np.array(Image.open('images/texture.png'))
 
 # Print image information
 print(img.ndim, img.shape)
 
-# Prepare list to get component and edge list
-mcl = None
-mel = None
-
-# Initiazlie grid graph
-cgbs.grid_graph_init(img = img, mcl = mcl, mec = mel)
-
+cgbs.train(img)

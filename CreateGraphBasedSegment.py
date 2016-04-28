@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 from Component import *
 from Edge import *
+import GraphBasedSegment as gbs
 
 '''
 Get or create component if not exist
@@ -28,8 +29,6 @@ Create grid-graph based initailized components.
 @param mec : reference object to get the initial merged edge component
 '''
 def grid_graph_init(img, mcl, mec):
-  mcl = MergedComponentList()
-  mec = MergedEdgeComponent()
   # y loop
   for row in range(img.shape[0]):
     # x loop
@@ -53,6 +52,114 @@ def grid_graph_init(img, mcl, mec):
 
         # Add edge
         mec.add_edge(pixel_component, target_component)
+
+'''
+Create sorted edge by no-decreasing edge weight.
+@param mec : meged edge component to create sorted edge with
+@return dict(EdgeIdSet, MergedEdge) : Sorted merged edge
+'''
+def create_sorted_mc(mec):
+  org_edge_dict = mec.get_edge_dict()
+  return sorted(org_edge_dict.items(), key=lambda x:x[1].get_min_edge().get_difference())
+
+'''
+Construct new segmentation from previous segmentation.
+'''
+def construct_segmentation(mcl, mec, id_set, converted_id_list):
+  # Convert ids which is merged
+  id1 = id_set.get_id1()
+  id2 = id_set.get_id2()
+  converted_id1 = converted_id_list.get(id1)
+  converted_id2 = converted_id_list.get(id2)
+  id_set = EdgeIdSet(converted_id1, converted_id2)
+
+  if converted_id1 == converted_id2:
+    return
+
+  if gbs.gbs_is_merge(id_set=id_set, mcl=mcl, mec=mec):
+    # merge id2 to id1
+    mcl.merge(id_set.get_id2(), id_set.get_id1())
+    mec.merge(id_set.get_id2(), id_set.get_id1())
+    converted_id_list.add(id_set.get_id2(), id_set.get_id1())
+
+'''
+Train graph based segmentation.
+'''
+def train(img):
+  # Initialize segmentation
+  mcl = MergedComponentList()
+  mec = MergedEdgeComponent()
+  grid_graph_init(img = img, mcl = mcl, mec = mec)
+
+  # Train segmentation
+  sorted_mc = create_sorted_mc(mec)
+  converted_id_list = ConvertedIdList()
+  print("edge_len = {0}".format(len(sorted_mc)))
+  for phase, mc in enumerate(sorted_mc):
+    # mec.get_merged_edge(1241, 1304).print_edges()
+    construct_segmentation(mcl=mcl, mec=mec, id_set=mc[0], converted_id_list=converted_id_list)
+    if phase % 200 == 0:
+      print("phase = {0}".format(phase))
+
+  print("Last Phase = {0}".format(len(sorted_mc)))
+  # Create image
+  # segmented_image = np.zeros((img.shape[0], img.shape[1], img.ndim), dtype=np.uint8)
+  segmented_image = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+  mc_dict = mcl.get_mc_dict()
+  max_value = len(mc_dict)
+  iter = 0
+  for seg_id, mc in mc_dict.items():
+    print("segment : {0}".format(iter))
+    mono_value = iter * 255 / max_value
+    for pixel in mc.get_pixel_list():
+      elem = pixel.get_elem()
+      segmented_image[elem[0], elem[1]] = mono_value
+      print("{0}, {1}".format(elem[0], elem[1]))
+    print("=============================")
+    iter += 1
+
+  img_raw = Image.fromarray(segmented_image, 'L')
+  img_raw.save('result.png')
+
+
+'''
+Preserve converted id (from, to)
+'''
+class ConvertedIdList:
+
+  '''
+  Initialize with empty dict(from: to)
+  '''
+  def __init__(self):
+    self.converted_id = dict()
+
+  '''
+  Add new convert list
+  '''
+  def add(self, from_id, to_id):
+    # If to in dict matches with from_id, convert it to to_id.
+    changed_cand = list()
+    for dict_from, dict_to in self.converted_id.items():
+      if dict_to == from_id:
+        changed_cand.append(dict_from)
+
+    # Convert id
+    for dict_from in changed_cand:
+      self.converted_id[dict_from] = to_id
+
+    # Append new id
+    self.converted_id[from_id] = to_id
+
+  '''
+  Get converted id if exist.
+  @param from_id : id to search
+  @return int : id to be converted from from_id
+  '''
+  def get(self, from_id):
+    if from_id in self.converted_id:
+      return self.converted_id[from_id]
+    else:
+      return from_id
 
 '''
 Create nn-graph based initailized components.

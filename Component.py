@@ -46,8 +46,8 @@ class Component:
   Convert id of this component.
   @param id   : id will be changed to this id
   '''
-  def set_id(self, id):
-    self.id = id
+  def set_id(self, to_id):
+    self.id = to_id
 
   '''
   Print content of component
@@ -67,6 +67,7 @@ class MergedComponent:
   '''
   def __init__(self, pixel):
     self.pixel_list = list()
+    self.pixel_list.append(pixel)
     self.pixel_max = pixel.get_value()
     self.pixel_min = pixel.get_value()
 
@@ -75,7 +76,7 @@ class MergedComponent:
   @param added_pixel : a pixel to add to the component
   '''
   def add(self, added_pixel):
-    self.pixel_list += added_pixel
+    self.pixel_list.append(added_pixel)
     # Update max value pixel
     if self.pixel_max < added_pixel.get_value():
       self.pixel_max = added_pixel.get_value()
@@ -95,7 +96,7 @@ class MergedComponent:
     if self.pixel_max < mc.get_max():
       self.pixel_max = mc.get_max()
     # update min
-    if self.pixel_min > mc.get_min_id():
+    if self.pixel_min > mc.get_min():
       self.pixel_min = mc.get_min()
 
   '''
@@ -105,7 +106,7 @@ class MergedComponent:
   @return int : Internal difference
   '''
   def get_internal_diff(self):
-    return self.pixel_list[self.pixel_max].get_value() - self.pixel_list[self.pixel_min].get_value()
+    return self.pixel_max - self.pixel_min
 
   '''
   Get max value pixel.
@@ -128,6 +129,13 @@ class MergedComponent:
   def get_pixel_list(self):
     return self.pixel_list
 
+  '''
+  Get pixel number size.
+  @return int : size
+  '''
+  def get_size(self):
+    return len(self.pixel_list)
+
 
 '''
 Relationship between current components and components merged in them
@@ -139,16 +147,25 @@ class MergedComponentList:
   Initialize with empty list.
   '''
   def __init__(self):
-    self.mc_list = dict()
+    self.mc_dict = dict()
 
   '''
   Add pixel to specific id.
+  @param id : specified component id
+  @param pixel : added pixel
   '''
   def add(self, id, pixel):
-    if id in self.mc_list.keys():
-      self.mc_list[id].append(pixel)
+    if id in self.mc_dict.keys():
+      self.mc_dict[id].append(pixel)
     else:
-      self.mc_list[id] = MergedComponent(pixel)
+      self.mc_dict[id] = MergedComponent(pixel)
+
+  '''
+  Get all merged components.
+  @return dict(int, MergedComponent) : all merged component dict
+  '''
+  def get_mc_dict(self):
+    return self.mc_dict
 
   '''
   Merge pixels of from_id to pixels of to_id
@@ -156,9 +173,8 @@ class MergedComponentList:
   @param to_id   : Edge of from_id will be changed to this id
   '''
   def merge(self, from_id, to_id):
-    move_mc = self.mc_list.pop(from_id)
-    self.mc_list[to_id].merge(move_mc)
-    del self.mc_list[from_id]
+    move_mc = self.mc_dict.pop(from_id)
+    self.mc_dict[to_id].merge(move_mc)
 
   '''
   Get the specified merged component
@@ -166,9 +182,9 @@ class MergedComponentList:
   @return MergedComponent : specified merged component
           None if id of the component does not exist
   '''
-  def get_component(self, search_id):
-    if search_id in self.mc_list:
-      return self.mc_list[search_id]
+  def get_merged_component(self, search_id):
+    if search_id in self.mc_dict:
+      return self.mc_dict[search_id]
     else:
       return None
 
@@ -177,6 +193,6 @@ class MergedComponentList:
   '''
   def print_list(self):
     print("--- list of components ---")
-    for k, v in self.mc_list.items():
+    for k, v in self.mc_dict.items():
       print("{0} : {1}".format(k, v))
     print("--- list of components ---")

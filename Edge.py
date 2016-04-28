@@ -47,7 +47,7 @@ class Edge:
   '''
   def print_edge(self):
     print("edge :) {0} with {1}"
-      .format(self.comp1.get_pixel(), self.comp2.get_pixel()))
+      .format(self.comp1.get_pixel().get_elem(), self.comp2.get_pixel().get_elem()))
 
 
 '''
@@ -86,6 +86,13 @@ class MergedEdge:
   '''
   def get_min_edge(self):
     return self.min_edge
+
+  '''
+  Get list of edges.
+  @return list(Edge) : list of edges
+  '''
+  def get_edge_list(self):
+    return self.edge_list
 
   '''
   Merge another merged edge to this.
@@ -185,6 +192,23 @@ class MergedEdgeComponent:
       self.edge_dict[id_set] = MergedEdge(edge)
 
   '''
+  Get edege which has id1 and id2.
+  @param id1 : edge id1
+  @param id2 : edge id2
+  @return MergedEdge : specified merged edge
+  '''
+  def get_merged_edge(self, id1, id2):
+    id_set = EdgeIdSet(id1, id2)
+    return self.edge_dict[id_set]
+
+  '''
+  Get merged edge dict.
+  @return dict(EdgeIdSet, MergedEdge) : All merged edge dict
+  '''
+  def get_edge_dict(self):
+    return self.edge_dict
+
+  '''
   Add component to the list
   '''
   def add_component(self, cid, component):
@@ -217,16 +241,16 @@ class MergedEdgeComponent:
   '''
   def merge(self, from_id, to_id):
     # Change ids in component list
-    for cid, c in component_dict.items():
+    for cid, c in self.component_dict.items():
       if cid == from_id:
-        c.set_id(from_id, to_id)
+        c.set_id(to_id)
 
     # Id sets to be changed
     changed_id_sets = list() 
     # Change ids in id sets in edge_dict
     for id_set in self.edge_dict.keys():
-      id_set.contains_id(from_id)
-      contains_id_sets.append(id_set)
+      if id_set.contains_id(from_id):
+        changed_id_sets.append(id_set)
 
     # Merge or delete edge_dict
     for id_set in changed_id_sets:
@@ -239,11 +263,13 @@ class MergedEdgeComponent:
         id_pair_of_to = id2 if id1==from_id else id1
         # id set after change
         changed_id_set = EdgeIdSet(id_pair_of_to, to_id)
+        # Merge
+        move_me = self.edge_dict.pop(id_set)
+
         if changed_id_set in self.edge_dict:
-          # Merge
-          self.edge_dict[changed_id_set].merge(self.edge_dict[id_set])
-          # Delete original element
-          del self.edge_dict[id_set]
+          self.edge_dict[changed_id_set].merge(move_me)
+        else:
+          self.edge_dict[changed_id_set] = move_me
 
   '''
   Print list of components

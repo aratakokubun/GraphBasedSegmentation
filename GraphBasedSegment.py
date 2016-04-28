@@ -6,28 +6,25 @@ from Component import *
 
 '''
 Judge if merging two components.
-@param id1 : One of two components to judge if to be merged
-@param id2 : One of two components to judge if to be merged
+@param id_set : id set to check merge
 @param mcl : Merged Component List
 @param mec : Merged Edge Components
-@param img : numpy image array
 @return bool : TRUE if merging two components, else FALSE
 '''
-def gbs_is_merge(id1, id2, mcl, mel, img):
-  return gbs_dif(comp1, comp2, mel, img) > gbs_mint(comp1, comp2, mcl, img)
+def gbs_is_merge(id_set, mcl, mec):
+  return gbs_dif(id_set.get_id1(), id_set.get_id2(), mec) < gbs_mint(id_set.get_id1(), id_set.get_id2(), mcl)
 
 '''
 Calculate the mimum internal difference between two components.
 @param id1 : One of two components to calculate minimum internal difference of boundary
 @param id2 : One of two components to calculate minimum internal difference of boundary
 @param mcl : Merged Component List
-@param img : numpy image array
 @return float : minimum internal difference between two components
 '''
-def gbs_mint(id1, id2, mcl, img):
-  mc1 = mcl.get_component(id1)
-  mc2 = mcl.get_component(id2)
-  return min(gbs_int(mc1, img)+gbs_tau(mc1), gbs_int(mc2, img)+gbs_tau(mc2))
+def gbs_mint(id1, id2, mcl):
+  mc1 = mcl.get_merged_component(id1)
+  mc2 = mcl.get_merged_component(id2)
+  return min(gbs_int(mc1)+gbs_tau(mc1), gbs_int(mc2)+gbs_tau(mc2))
 
 '''
 Difference method
@@ -43,35 +40,32 @@ THIS PROGRAM ADAPT LUMINANCE AS A DIFFERENCE
 @param id1 : One of two components to calculate minimum difference of boundary
 @param id2 : One of two components to calculate minimum difference of boundary
 @param mec : Merged Edge Components
-@param img : numpy image array
 @return int : minimum difference of boundary
 '''
-def gbs_dif(id1, id2, mel, img):
-  # TODO
-  pass
+def gbs_dif(id1, id2, mec):
+  me = mec.get_merged_edge(id1, id2)
+  return me.get_min_edge().get_difference()
 
 '''
 Calculate the maximum difference in the componet.
 THIS PROGRAM ADAPT LUMINANCE AS A DIFFERENCE
 @param mc : merged component to calculate maximum difference in the component
-@param img : numpy image array
 @return int : maximum difference in the component
 '''
-def gbs_int(mc, img):
-  # TODO
-  pass
+def gbs_int(mc):
+  return mc.get_internal_diff()
 
 '''
 Coefficient parameter to calculate threashold
 '''
-tau_k = 150
+tau_k = 10
 '''
 Calculate threashold based on the size of the component.
 @param mc : merged component to calculate the threashold
 @return float : threashold based on the size of the component
 '''
 def gbs_tau(mc):
-  return float(tau_k / len(mc))
+  return float(tau_k / mc.get_size())
 
 '''
 Calculate luminance
