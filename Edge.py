@@ -193,12 +193,10 @@ class MergedEdgeComponent:
 
   '''
   Get edege which has id1 and id2.
-  @param id1 : edge id1
-  @param id2 : edge id2
+  @param id_set : edge id set
   @return MergedEdge : specified merged edge
   '''
-  def get_merged_edge(self, id1, id2):
-    id_set = EdgeIdSet(id1, id2)
+  def get_merged_edge(self, id_set):
     return self.edge_dict[id_set]
 
   '''

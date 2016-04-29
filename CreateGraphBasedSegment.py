@@ -5,6 +5,7 @@ import numpy as np
 from Component import *
 from Edge import *
 import GraphBasedSegment as gbs
+import CreateResultImage as cri
 
 '''
 Get or create component if not exist
@@ -98,28 +99,12 @@ def train(img):
   for phase, mc in enumerate(sorted_mc):
     # mec.get_merged_edge(1241, 1304).print_edges()
     construct_segmentation(mcl=mcl, mec=mec, id_set=mc[0], converted_id_list=converted_id_list)
-    if phase % 200 == 0:
+    if phase % 1000 == 0:
       print("phase = {0}".format(phase))
 
-  print("Last Phase = {0}".format(len(sorted_mc)))
   # Create image
-  # segmented_image = np.zeros((img.shape[0], img.shape[1], img.ndim), dtype=np.uint8)
-  segmented_image = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
-  mc_dict = mcl.get_mc_dict()
-  max_value = len(mc_dict)
-  iter = 0
-  for seg_id, mc in mc_dict.items():
-    print("segment : {0}".format(iter))
-    mono_value = iter * 255 / max_value
-    for pixel in mc.get_pixel_list():
-      elem = pixel.get_elem()
-      segmented_image[elem[0], elem[1]] = mono_value
-      print("{0}, {1}".format(elem[0], elem[1]))
-    print("=============================")
-    iter += 1
-
-  img_raw = Image.fromarray(segmented_image, 'L')
-  img_raw.save('result.png')
+  # cri.create_monocolor_result(img, mcl, "result.png")
+  cri.create_colorized_result(img, mcl, 30, "result.png")
 
 
 '''
