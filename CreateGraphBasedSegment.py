@@ -72,10 +72,11 @@ def construct_segmentation(mcl, mec, id_set, converted_id_list):
   id2 = id_set.get_id2()
   converted_id1 = converted_id_list.get(id1)
   converted_id2 = converted_id_list.get(id2)
-  id_set = EdgeIdSet(converted_id1, converted_id2)
 
   if converted_id1 == converted_id2:
     return
+
+  id_set = EdgeIdSet(converted_id1, converted_id2)
 
   if gbs.gbs_is_merge(id_set=id_set, mcl=mcl, mec=mec):
     # merge id2 to id1
@@ -141,10 +142,7 @@ class ConvertedIdList:
   @return int : id to be converted from from_id
   '''
   def get(self, from_id):
-    if from_id in self.converted_id:
-      return self.converted_id[from_id]
-    else:
-      return from_id
+    return self.converted_id.get(from_id, from_id)
 
 '''
 Create nn-graph based initailized components.

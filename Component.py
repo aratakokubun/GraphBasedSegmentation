@@ -183,10 +183,7 @@ class MergedComponentList:
           None if id of the component does not exist
   '''
   def get_merged_component(self, search_id):
-    if search_id in self.mc_dict:
-      return self.mc_dict[search_id]
-    else:
-      return None
+    return self.mc_dict.get(search_id, None)
 
   '''
   Print list of components

@@ -50,7 +50,7 @@ def create_colorized_result(img, mcl, n, name):
   for mc_item, color in zip(sorted_mc_dict, colors):
     seg_id = mc_item[0]
     mc = mc_item[1]
-    print("Size : {0}, color : {1}",mc.get_size(), color) 
+    print("Size : {0}, color : {1}".format(mc.get_size(), color))
     for pixel in mc.get_pixel_list():
       elem = pixel.get_elem()
       segmented_image[elem[0], elem[1], 0] = color[0]

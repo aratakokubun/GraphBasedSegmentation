@@ -47,7 +47,7 @@ def gbs_dif(id_set, mec):
 
 '''
 Calculate the maximum difference in the componet.
-THIS PROGRAM ADAPT LUMINANCE AS A DIFFERENCE
+THIS PROGRAM ADAPT LUMINANCE AS A DIF4RENCE
 @param mc : merged component to calculate maximum difference in the component
 @return int : maximum difference in the component
 '''
@@ -57,7 +57,7 @@ def gbs_int(mc):
 '''
 Coefficient parameter to calculate threashold
 '''
-tau_k = 3
+tau_k = 4
 '''
 Calculate threashold based on the size of the component.
 @param mc : merged component to calculate the threashold

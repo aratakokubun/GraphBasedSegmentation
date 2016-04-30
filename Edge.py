@@ -238,36 +238,36 @@ class MergedEdgeComponent:
   @param to_id   : Edge of from_id will be changed to this id
   '''
   def merge(self, from_id, to_id):
-    # Change ids in component list
-    for cid, c in self.component_dict.items():
-      if cid == from_id:
-        c.set_id(to_id)
-
     # Id sets to be changed
-    changed_id_sets = list() 
+    changed_id_sets = list()
+    deleted_id_sets = list()
     # Change ids in id sets in edge_dict
     for id_set in self.edge_dict.keys():
       if id_set.contains_id(from_id):
-        changed_id_sets.append(id_set)
+        if id_set.contains_id(to_id):
+          deleted_id_sets.append(id_set)
+        else:
+          changed_id_sets.append(id_set)
 
-    # Merge or delete edge_dict
+    # Delete edge_dict
+    for id_set in deleted_id_sets:
+      del self.edge_dict[id_set]
+
+    # Merge edge_dict
     for id_set in changed_id_sets:
       id1 = id_set.get_id1()
       id2 = id_set.get_id2()
-      if id1 == to_id or id2 == to_id:
-        # Delete
-        del self.edge_dict[id_set]
-      else:
-        id_pair_of_to = id2 if id1==from_id else id1
-        # id set after change
-        changed_id_set = EdgeIdSet(id_pair_of_to, to_id)
-        # Merge
-        move_me = self.edge_dict.pop(id_set)
 
-        if changed_id_set in self.edge_dict:
-          self.edge_dict[changed_id_set].merge(move_me)
-        else:
-          self.edge_dict[changed_id_set] = move_me
+      id_pair_of_to = id2 if id1==from_id else id1
+      # id set after change
+      changed_id_set = EdgeIdSet(id_pair_of_to, to_id)
+      # Merge
+      move_me = self.edge_dict.pop(id_set)
+
+      if changed_id_set in self.edge_dict:
+        self.edge_dict[changed_id_set].merge(move_me)
+      else:
+        self.edge_dict[changed_id_set] = move_me
 
   '''
   Print list of components
