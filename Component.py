@@ -28,14 +28,6 @@ class Component:
     return self.pixel
 
   '''
-  Get if this component contains the pixel.
-  @return boolean : TRUE if contains the pixel, else FALSE
-  '''
-  def contain(self, row, col):
-    return self.pixel.get_elem()[0] == row and \
-     self.pixel.get_elem()[1] == col
-
-  '''
   Get the id of this component.
   @return int : id
   '''

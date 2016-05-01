@@ -169,14 +169,14 @@ class EdgeIdSet(object):
 '''
 Manage all edges and components in them.
 '''
-class MergedEdgeComponent:
+class MergedEdgeList:
 
   '''
   Initialize with empty dicts
   '''
   def __init__(self):
     self.edge_dict = dict()
-    self.component_dict = dict()
+    self.edge_id_count = dict()
 
   '''
   Add edge to the list
@@ -190,6 +190,11 @@ class MergedEdgeComponent:
       self.edge_dict[id_set].add(edge)
     else:
       self.edge_dict[id_set] = MergedEdge(edge)
+      # TODO
+      # Add count
+      self.edge_id_count[id_set.get_id1()] = self.edge_id_count.get(id_set.get_id1(), 0) + 1
+      self.edge_id_count[id_set.get_id2()] = self.edge_id_count.get(id_set.get_id2(), 0) + 1
+      # TODO
 
   '''
   Get edege which has id1 and id2.
@@ -207,31 +212,6 @@ class MergedEdgeComponent:
     return self.edge_dict
 
   '''
-  Add component to the list
-  '''
-  def add_component(self, cid, component):
-    self.component_dict[cid] = component
-
-  '''
-  Search component with id
-  @param search_id : id to search 
-  @return bool : TRUE if the id is found, else FALSE
-  '''
-  def search_component(self, search_id):
-    return search_id in self.component_dict
-
-  '''
-  Get specified component
-  @param search_id : id to search 
-  @return Component : target component
-  '''
-  def get_component(self, search_id):
-    if search_id in self.component_dict:
-      return self.component_dict[search_id]
-    else:
-      return None
-
-  '''
   Merge edges with changing ids of all components.
   Since all components are preseved in component_dict, change id in it.
   @param from_id : Edge of this id will be changed to to_id
@@ -241,17 +221,33 @@ class MergedEdgeComponent:
     # Id sets to be changed
     changed_id_sets = list()
     deleted_id_sets = list()
+    # TODO
+    contained = self.edge_id_count.get(from_id, 0)
+    count = 0
+    # TODO
     # Change ids in id sets in edge_dict
     for id_set in self.edge_dict.keys():
+      # TODO
+      if count >= contained:
+        break;
+      # TODO
       if id_set.contains_id(from_id):
         if id_set.contains_id(to_id):
           deleted_id_sets.append(id_set)
         else:
           changed_id_sets.append(id_set)
+        # TODO
+        count += 1
+        # TODO
 
     # Delete edge_dict
     for id_set in deleted_id_sets:
       del self.edge_dict[id_set]
+      # TODO
+      # Decrease count
+      self.edge_id_count[id_set.get_id1()] = self.edge_id_count.get(id_set.get_id1(), 1) - 1
+      self.edge_id_count[id_set.get_id2()] = self.edge_id_count.get(id_set.get_id2(), 1) - 1
+      # TODO
 
     # Merge edge_dict
     for id_set in changed_id_sets:
@@ -263,21 +259,26 @@ class MergedEdgeComponent:
       changed_id_set = EdgeIdSet(id_pair_of_to, to_id)
       # Merge
       move_me = self.edge_dict.pop(id_set)
+      # TODO
+      # Decrease count
+      self.edge_id_count[id_set.get_id1()] = self.edge_id_count.get(id_set.get_id1(), 1) - 1
+      self.edge_id_count[id_set.get_id2()] = self.edge_id_count.get(id_set.get_id2(), 1) - 1
+      # TODO
 
       if changed_id_set in self.edge_dict:
         self.edge_dict[changed_id_set].merge(move_me)
       else:
         self.edge_dict[changed_id_set] = move_me
+        # TODO
+        # Add count
+        self.edge_id_count[changed_id_set.get_id1()] = self.edge_id_count.get(changed_id_set.get_id1(), 0) + 1
+        self.edge_id_count[changed_id_set.get_id2()] = self.edge_id_count.get(changed_id_set.get_id2(), 0) + 1
+        # TODO
 
   '''
-  Print list of components
+  Print list of edges
   '''
   def print_list(self):
-    print("--- list of components in merged edges---")
-    for c in self.component_dict.values():
-      c.print_component()
-    print("--- list of components in merged edges ---")
-
     print("--- list of edges in merged edges---")
     for id_set, me in self.edge_dict.items():
       print("======(id1:{0}, id2:{1})======".format(id_set.get_id1(), id_set.get_id2()))
@@ -287,11 +288,20 @@ class MergedEdgeComponent:
 
   '''
   Get minimum difference edge between the specified two components.
+  @param id_set : id set to search
+  @return int : minimmum difference
   '''
-  def calc_min_diff(self, id1, id2):
-    id_set = EdgeIdSet(id1, id2)
+  def calc_min_diff(self, id_set):
     if id_set in self.edge_dict:
       return self.edge_dict[id_set].get_min_edge().get_difference()
     else:
       # Edge is infinite
-      return sys.maxint
+      print("{0},{1} is infinite.".format(id_set.get_id1(), id_set.get_id2()))
+      return sys.maxsize
+
+  '''
+  Create sorted edge by no-decreasing edge weight.
+  @return dict(EdgeIdSet, MergedEdge) : Sorted merged edge
+  '''
+  def create_sorted_mc(self):
+    return sorted(self.edge_dict.items(), key=lambda item:item[1].get_min_edge().get_difference())

@@ -8,11 +8,11 @@ from Component import *
 Judge if merging two components.
 @param id_set : id set to check merge
 @param mcl : Merged Component List
-@param mec : Merged Edge Components
+@param mel : Merged Edge List
 @return bool : TRUE if merging two components, else FALSE
 '''
-def gbs_is_merge(id_set, mcl, mec):
-  return gbs_dif(id_set, mec) < gbs_mint(id_set.get_id1(), id_set.get_id2(), mcl)
+def gbs_is_merge(id_set, mcl, mel):
+  return gbs_dif(id_set, mel) < gbs_mint(id_set.get_id1(), id_set.get_id2(), mcl)
 
 '''
 Calculate the mimum internal difference between two components.
@@ -38,12 +38,15 @@ method = LUMINANCE
 Calculate the minimum difference of boundary between two components.
 THIS PROGRAM ADAPT LUMINANCE AS A DIFFERENCE
 @param id_set : edge ids to calculate minimum difference of boundary
-@param mec : Merged Edge Components
+@param mel : Merged Edge List
 @return int : minimum difference of boundary
 '''
-def gbs_dif(id_set, mec):
+def gbs_dif(id_set, mel):
+  return mel.calc_min_diff(id_set)
+  '''
   me = mec.get_merged_edge(id_set)
   return me.get_min_edge().get_difference()
+  '''
 
 '''
 Calculate the maximum difference in the componet.
@@ -57,7 +60,7 @@ def gbs_int(mc):
 '''
 Coefficient parameter to calculate threashold
 '''
-tau_k = 4
+tau_k = 4.5
 '''
 Calculate threashold based on the size of the component.
 @param mc : merged component to calculate the threashold
