@@ -172,7 +172,6 @@ class NearestNeightborGraphSegmentation(SegmentationProcess):
         if row == 0 and col == 0:
           continue
         self.nn_graph_search.append((row, col))
-        print((row, col))
 
   '''
   Create grid-graph based initailized components.

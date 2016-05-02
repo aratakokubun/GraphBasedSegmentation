@@ -12,16 +12,17 @@ from SegmentationProcess import *
 import GraphBasedSegment as gbs
 
 # Load image via PIL.
-img = np.array(Image.open('images/sample9.jpg'))
+src_file = 'images/sample5.jpg'
+img = np.array(Image.open(src_file))
 # Specify destination output file.
 dst = 'result/gbs_ret.png'
 # Specify coloring segmentations each of which has top n area. 
 top_n = 40
 # Specify tau_k parameter optinally.
-gbs.tau_k = 3.8
+gbs.tau_k = 1.4
 
 # Print image information
-print(img.ndim, img.shape)
+print("file : {0}, shape:{1}".format(src_file, img.shape))
 
 '''
 # Initialize SegmentationProcess.
@@ -31,7 +32,7 @@ ggs.train()
 '''
 
 # Initialize SegmentationProcess.
-nn = 2
+nn = 3
 nngs = NearestNeightborGraphSegmentation(img, dst, top_n, nn)
 # Traing the image and output a image file.
 nngs.train()
