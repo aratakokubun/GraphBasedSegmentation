@@ -37,3 +37,14 @@ def create_random_colors(div_n):
   colors = create_colors(div_n)
   shuffle(colors)
   return colors
+
+'''
+Calculate luminance
+@param rgb : list pf rgb value of the pixel
+@return float : luminance
+'''
+def calc_luminance(rgb):
+  if type(rgb): # rgb or rgba
+    return 0.298912*rgb[0] + 0.586611*rgb[1] + 0.114478*rgb[2]
+  else:
+    return rgb # monocolor
